@@ -8,8 +8,9 @@
 
 An automated pipeline that ingests Twitch streams from popular gamers, detects highlight
 moments with AI, edits them into vertical short-form video optimised for TikTok and
-YouTube Shorts, and publishes them at scale — generating revenue through platform
-creator-reward programmes and streamer revenue-share partnerships.
+YouTube Shorts, and publishes them at scale on our own network of clip channels — keeping 100% of
+creator-reward revenue, with streamer permission obtained through a free opt-in
+(promotion-for-permission) flow rather than paid licensing deals.
 
 ---
 
@@ -34,19 +35,41 @@ below is structured around fixing that.
 3. **Detection is automated.** Both platforms fingerprint content (Content ID, TikTok's
    matching systems). "Fly under the radar" is not a strategy; it is a countdown timer.
 
-**Therefore the product's moat is not the clipping tech — it's the rights layer.** The
-viable framings, in order of attractiveness:
+**A note on "streamers are happy to be clipped."** Largely true — clip channels are
+free marketing and many streamers encourage them. But two distinctions matter for a
+commercial automated operation:
+
+- *Tolerance is not a licence, and it flips when money appears.* Streamers tolerate fan
+  clipping; several large streamers have DMCA'd clip farms specifically once those
+  channels were visibly monetising at scale. Informal goodwill is a single point of
+  failure — one takedown wave can kill a channel carrying hundreds of videos. The fix is
+  nearly free: a **one-click opt-in consent** (streamer grants blanket clip permission in
+  exchange for credit + links, no revenue share). We keep 100% of revenue; the only
+  difference is written permission instead of assumed permission.
+- *Permission does not unlock the reward programmes.* TikTok and YouTube's originality
+  rules apply regardless of whether the source creator is happy: content the poster
+  didn't create, without significant creative input, is ineligible for Creator Rewards
+  and falls under YouTube's reused-content policy even with a licence in hand. What
+  unlocks monetisation is **transformation** — real editing, captions, hooks, framing,
+  compilation/commentary formats — which our pipeline produces anyway. YouTube clip
+  channels with genuine editorial value do get monetised; TikTok Creator Rewards is the
+  stricter programme and should be modelled as reach + upside, not the base revenue case.
+
+The viable models:
 
 | Model | Description | Who earns the rewards |
 |---|---|---|
-| **A. Streamer-as-customer (SaaS/agency)** | Streamers (or their agencies) run ClipEngine on *their own* streams; output posts to *their* TikTok/Shorts accounts. Content is original to the account owner → fully rewards-eligible. | The streamer; we charge SaaS fee and/or % of rewards |
-| **B. Licensed clip network** | We operate clip channels under written licence + revenue-share agreements with streamers. Transformation (editing, captions, commentary) supports originality claims. | Us, sharing back to streamers |
-| **C. Unlicensed reposting** | Scrape and repost. | ❌ Not viable: infringing, demonetised, account bans. **Out of scope.** |
+| **C. Own-brand permissioned clip network (primary)** | We operate our own clip channels. Sources limited to streamers with published clip-permission policies or our one-click opt-in. Heavy automated transformation for originality. No revenue share. | **Us — 100%** |
+| **A. Streamer-as-customer (SaaS)** | Streamers run ClipEngine on their own streams, posting to their own accounts. Fully rewards-eligible originality. | The streamer; we charge SaaS fees |
+| **B. Licensed clip network (rev-share)** | Fallback for high-value streamers who won't grant free permission: written licence + revenue share. | Us, sharing back |
+| ~~D. Unlicensed raw reposting~~ | Scrape and repost without permission or transformation. | ❌ Demonetised by originality rules regardless of copyright posture; account bans. **Out of scope.** |
 
-**Recommendation: lead with Model A**, with Model B as an expansion for streamers who
-don't want to manage accounts. The same pipeline powers both. Model A also solves cold
-start: the streamer's existing audience seeds the follower/view thresholds the reward
-programmes require.
+**Recommendation: lead with Model C** — it matches the goal of keeping all clip revenue
+and requires no commercial negotiation, only a free consent flow. Run Model A (SaaS) in
+parallel as a second revenue line with zero platform-policy risk and use it as the
+carrot in the opt-in pitch ("let us clip you free on our network, or subscribe and we
+clip to *your* accounts"). Model B is reserved for must-have streamers. The same
+pipeline powers all three.
 
 ---
 
@@ -74,9 +97,25 @@ programmes require.
 
 ## 4. Product overview
 
-### 4.1 User-facing product (Model A)
+### 4.1 Product surfaces
 
-A web dashboard where a streamer:
+**Model C (primary) — internal operations console.** Our own team's dashboard:
+
+1. Roster management: streamers we're cleared to clip (published clip-policy links or
+   signed opt-ins on file, verified per source before ingestion is enabled).
+2. Channel portfolio: our TikTok/Shorts accounts, each themed by game or streamer
+   cluster, with per-channel posting cadence and monetisation status.
+3. Candidate review queue → approve/auto-publish, plus originality-strength indicators
+   (how much transformation was applied) per clip.
+4. Earnings dashboard: rewards revenue per channel/streamer/clip-type, feeding the
+   learning loop.
+
+**Opt-in consent flow (public-facing, minimal).** A one-page form a streamer (or their
+mod/manager) completes in under a minute: grant blanket clip permission, choose credit
+format, optional exclusions (e.g. no sponsor segments). Stored with timestamp as our
+permission record. The pitch to streamers: free promotion, credited links, zero effort.
+
+**Model A (secondary) — streamer SaaS dashboard.** A web dashboard where a streamer:
 
 1. Connects Twitch (OAuth) + TikTok + YouTube accounts.
 2. Sets preferences: games, clip style, caption style, branding overlay, posting cadence,
@@ -176,55 +215,69 @@ frame-level vision. Ship that first; add game-event CV per title later.
 
 ## 6. MVP scope (Phase 1)
 
-**Goal: prove the pipeline produces clips a streamer would actually post, for 3–5 design
-partners, in 6–8 weeks.**
+**Goal: prove the pipeline produces clips that earn views, running 2–3 of our own
+channels sourced from 10–20 opted-in / clip-permissive streamers, in 6–8 weeks.**
 
 In scope:
-- VOD-based (not live) ingestion for connected streamer accounts.
+- Opt-in consent form + roster of streamers with verified clip permission (start with
+  streamers who already publish permissive clip policies — fastest to onboard).
+- VOD-based (not live) ingestion.
 - Detection: chat velocity + audio excitement + Twitch clip-rate signals only.
-- Facecam-top/gameplay-bottom vertical edit, word-level captions, 61–90s targeting.
-- Review queue + manual export; **YouTube Shorts auto-publish only** (TikTok API audit
-  will still be pending; MVP exports TikTok-ready files for manual upload).
-- Basic dashboard: connect accounts, review/approve, view posted clips.
+- Facecam-top/gameplay-bottom vertical edit, word-level captions, 61–90s targeting,
+  credit overlay + linked attribution per the streamer's chosen format.
+- Review queue with human approval on every clip (quality bar + originality check);
+  **YouTube Shorts auto-publish only** (TikTok API audit will still be pending; MVP
+  exports TikTok-ready files for manual upload).
+- 2–3 own-brand channels themed by game, growing toward monetisation thresholds
+  (YouTube: 1k subs + 10M Shorts views/90d; TikTok: 10k followers + 100k views/30d).
 
 Explicitly out of scope for MVP: live ingestion, game-event CV, TikTok auto-post,
-earnings analytics, Model B network channels.
+earnings analytics, the Model A SaaS dashboard.
 
-**MVP success criteria:** ≥50% of generated candidate clips approved by design partners;
-≥1 clip from the pipeline outperforming the streamer's manual-clip median views.
+**MVP success criteria:** ≥15 streamers on the permission roster; channels on a
+trajectory to hit monetisation thresholds within 90 days; ≥50% of candidate clips
+passing human review; zero takedowns or originality flags.
 
 ## 7. Roadmap after MVP
 
-- **Phase 2 (months 3–4): Publish & measure.** TikTok Content Posting API (submit audit
-  in week 1 of MVP), scheduling engine, analytics ingestion, earnings estimates,
-  per-streamer detector tuning. Start charging (£49–£199/mo tiers by clip volume).
-- **Phase 3 (months 5–6): Scale & sharpen.** Live-mode clipping (post within minutes of
-  the moment), game-event CV for top 5 titles, A/B hooks, multi-language caption
-  translation (huge cheap reach multiplier).
-- **Phase 4 (months 6+): Model B network.** Standard licence + rev-share contract
-  template; operate managed channels for streamers who opt in; compilation formats
-  (top-10s) for long-form YouTube monetisation.
+- **Phase 2 (months 3–4): Monetise & measure.** TikTok Content Posting API (submit
+  audit in week 1 of MVP), scheduling engine, analytics ingestion, earnings tracking per
+  channel/clip-type, per-audience detector tuning. First channels cross monetisation
+  thresholds; apply to both reward programmes.
+- **Phase 3 (months 5–6): Scale the network.** Grow the permission roster (target 100+
+  streamers), spin up channels per game vertical, live-mode clipping (post within
+  minutes of the moment), game-event CV for top 5 titles, A/B hooks, multi-language
+  caption translation (huge cheap reach multiplier). Compilation/commentary long-form
+  formats for YouTube — stronger originality posture *and* higher RPM than Shorts.
+- **Phase 4 (months 6+): Model A SaaS.** Package the same pipeline as a streamer-facing
+  product (£49–£199/mo tiers); use the opt-in roster as the warm lead list. Model B
+  rev-share licences only for must-have streamers who decline the free opt-in.
 
 ---
 
 ## 8. Business model & unit economics
 
-- **Primary revenue: SaaS.** Tiers by published-clip volume and features (auto-publish,
-  live mode, multi-language). Target £99/mo average.
-- **Secondary: rewards share** on managed (Model B) channels, e.g. 30% to us / 70%
-  streamer.
-- **Illustrative economics per Model A customer:** ~60 clips/mo × $0.15 compute ≈ $9
-  COGS against £99 revenue → ~90% gross margin. The sensitivity is ASR/GPU cost and
-  support load, not platform RPM — which is the point of being SaaS-first.
-- **Break-even sanity check for Model B (rewards-dependent):** a managed channel needs
-  roughly 1–2M qualified TikTok views/mo to cover its own compute + ops before any
-  profit. Treat Model B channels as a portfolio; kill underperformers monthly.
+- **Primary revenue: creator rewards on our own channels (Model C), 100% retained.**
+  No revenue share — permission is obtained free via the opt-in flow.
+- **Secondary (Phase 4): SaaS** tiers by clip volume and features, target £99/mo
+  average; plus Model B rev-share on the rare negotiated licences.
+- **Illustrative Model C economics per channel:** ~90 clips/mo × $0.15 compute ≈
+  $13.50 COGS. Revenue is view-dependent: at 3M qualified monthly views a channel earns
+  roughly $300–$900/mo on YouTube Shorts RPMs ($0.10–0.30) or $1.2k–$3k/mo if TikTok
+  Creator Rewards qualification holds ($0.40–1.00 RPM, >1min videos only). Compilation
+  long-form on YouTube ($2–5+ RPM) is the highest-value slot per view.
+- **Portfolio maths:** treat channels like positions — spin up cheaply, measure at 60/90
+  days against threshold trajectories, kill underperformers monthly. Break-even per
+  channel is low (~0.5M Shorts views/mo covers compute + ops share); the tail risk is
+  not cost, it's monetisation review rejection — which is why originality strength is
+  tracked per clip and why the SaaS line exists as the policy-risk-free hedge.
 
 ## 9. Key risks & mitigations
 
 | Risk | Severity | Mitigation |
 |---|---|---|
-| Platform policy: content deemed unoriginal / rewards clawed back | High | Model A (owner-posted) as default; documented licences for Model B; real editorial transformation, never raw re-uploads |
+| Platform policy: content deemed unoriginal / rewards denied or clawed back | High | This is Model C's #1 risk. Maximise transformation on every clip (editing, captions, hooks, framing, compilations); track originality strength per clip; weight YouTube (clearer transformation precedent) over TikTok in revenue projections; Model A SaaS as the policy-risk-free hedge |
+| Streamer goodwill flips once channels visibly earn (DMCA wave on a large channel) | High | Never ingest without a published clip policy or signed opt-in on file; prominent credit + links on every clip; honour revocation within 24h; keep the roster diversified so no streamer is >10% of a channel's content |
 | Music DMCA inside gameplay/stream audio | High | Audio fingerprint check stage; auto-mute/replace music beds before publish |
 | TikTok API audit rejection or posting caps | Medium | Apply early; review-queue + export fallback; diversify to Shorts + Instagram Reels |
 | Detection quality below "streamer would post this" bar | Medium | Human-in-the-loop review queue from day 1; per-streamer learning loop |
@@ -243,12 +296,13 @@ earnings analytics, Model B network channels.
 
 ## 11. Immediate next steps
 
-1. Validate demand: 10 conversations with mid-tier streamers (1k–20k CCV); pre-sell 3–5
-   design partnerships at a discount.
-2. Submit TikTok developer app for Content Posting API audit (longest external lead
+1. Build the source roster: compile 30–50 popular streamers who already publish
+   permissive clip policies (fastest legitimate supply, zero negotiation); draft the
+   one-click opt-in consent form and the promotion-for-permission pitch for the rest.
+2. Have a lawyer sanity-check the opt-in consent wording once (one-off cost; it's the
+   permission record the whole model rests on).
+3. Submit TikTok developer app for Content Posting API audit (longest external lead
    time).
-3. Draft the Model A terms + Model B licence/rev-share template with a lawyer (one-time
-   cost, unlocks the whole rights strategy).
 4. Technical spike (1 week): chat-spike + audio-energy detector against 3 public VODs;
    eyeball whether top-10 windows match the streamer's own posted clips.
-5. Build MVP per §6.
+5. Build MVP per §6 and launch the first 2 channels.
